@@ -606,10 +606,22 @@ quat operator*(const float &f, const quat &q)
 m4 QuatToM4(const quat &q)
 {
 	m4 result;
-	result.col[0] = V4(1 - 2*q.y*q.y - 2*q.z*q.z, 2*q.x*q.y - 2*q.w*q.z, 2*q.x*q.z + 2*q.w*q.y, 0.0f);
-	result.col[1] = V4(2*q.x*q.y + 2*q.w*q.z, 1 - 2*q.x*q.x - 2*q.z*q.z, 2*q.y*q.z - 2*q.w*q.x, 0.0f);
-	result.col[2] = V4(2*q.x*q.z - 2*q.w*q.y, 2*q.y*q.z + 2*q.w*q.x, 1 - 2*q.x*q.x - 2*q.y*q.y, 0.0f);
-	result.col[3] = V4(0,0,0,1);
+	result.a = 1 - 2*q.y*q.y - 2*q.z*q.z;
+	result.b = 2*q.x*q.y - 2*q.w*q.z;
+	result.c = 2*q.x*q.z + 2*q.w*q.y;
+	result.d = 0.0f;
+	result.e = 2*q.x*q.y + 2*q.w*q.z;
+	result.f = 1 - 2*q.x*q.x - 2*q.z*q.z;
+	result.g = 2*q.y*q.z - 2*q.w*q.x;
+	result.h = 0.0f;
+	result.i = 2*q.x*q.z - 2*q.w*q.y;
+	result.j = 2*q.y*q.z + 2*q.w*q.x;
+	result.k = 1 - 2*q.x*q.x - 2*q.y*q.y;
+	result.l = 0.0f;
+	result.m = 0;
+	result.n = 0;
+	result.o = 0;
+	result.p = 1;
 	return result;
 }
 

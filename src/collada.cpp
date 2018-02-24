@@ -1,4 +1,5 @@
 #include "collada.h"
+#include "file_utilities.h"
 #include "string.h"
 #include "stdlib.h"
 #include "stdio.h"
@@ -440,11 +441,12 @@ void ColladaPrintNode(collada_node *node, int indent)
 	}
 }
 
-collada_file ReadColladaFile(char *fileContents, memory_arena *arena)
+collada_file ReadColladaFile(char *fileName, memory_arena *arena)
 {
 	collada_file result;
 
 	xmltokenizer t;
+	char *fileContents = ReadFileIntoString(fileName, arena);
 	t.at = fileContents;
 	xmlnode *head = XMLParseNode(&t, arena);
 

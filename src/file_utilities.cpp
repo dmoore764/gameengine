@@ -112,6 +112,111 @@ char *ReadFileIntoString(const char *filename)
 #endif
 }
 
+char *ReadFileIntoString(const char *filename, memory_arena *arena)
+{
+#ifndef _WIN32
+    char *result = NULL;
+    FILE *file = fopen(filename, "r");
+    
+    if (file) {
+        fseek(file, 0L, SEEK_END);
+        size_t size = ftell(file);
+        fseek(file, 0L, SEEK_SET);
+        
+        result = PUSH_ARRAY(arena, char, size + 1);
+        fread(result, size, 1, file);
+        result[size] = '\0';
+        
+        fclose(file);
+    }
+    
+    return result;
+#else
+	HANDLE fileHandle = CreateFile(filename,               // file to open
+		GENERIC_READ,          // open for reading
+		FILE_SHARE_READ,       // share for reading
+		NULL,                  // default security
+		OPEN_EXISTING,         // existing file only
+		FILE_ATTRIBUTE_NORMAL, // normal file
+		NULL);                 // no attr. template
+
+	if (fileHandle == INVALID_HANDLE_VALUE)
+	{
+		// Error
+		return NULL;
+	}
+
+	DWORD size = GetFileSize(fileHandle, NULL);
+	DWORD bytesRead = 0;
+
+	char *result = PUSH_ARRAY(arena, char, size + 1);
+
+	if (FALSE == ReadFile(fileHandle, result, size - 1, &bytesRead, NULL))
+	{
+		// Error
+		DWORD err = GetLastError();
+		CloseHandle(fileHandle);
+		return NULL;
+	}
+
+	result[bytesRead] = '\0';
+
+	CloseHandle(fileHandle);
+	return result;
+#endif
+}
+
+void *ReadBinaryFile(const char *filename, size_t *length, memory_arena *arena)
+{
+#ifndef _WIN32
+    void *result = NULL;
+    FILE *file = fopen(filename, "r");
+    
+    if (file) {
+        fseek(file, 0L, SEEK_END);
+        size_t size = ftell(file);
+        *length = size;
+        fseek(file, 0L, SEEK_SET);
+        
+		result = PUSH_ARRAY(arena, char, size);
+        fread(result, size, 1, file);
+        fclose(file);
+    }
+    
+    return result;
+#else
+	HANDLE fileHandle = CreateFile(filename,               // file to open
+		GENERIC_READ,          // open for reading
+		FILE_SHARE_READ,       // share for reading
+		NULL,                  // default security
+		OPEN_EXISTING,         // existing file only
+		FILE_ATTRIBUTE_NORMAL, // normal file
+		NULL);                 // no attr. template
+
+	if (fileHandle == INVALID_HANDLE_VALUE)
+	{
+		// Error
+		return NULL;
+	}
+
+	DWORD size = GetFileSize(fileHandle, NULL);
+	DWORD bytesRead = 0;
+
+	char *result = PUSH_ARRAY(arena, char, size);
+
+	if (FALSE == ReadFile(fileHandle, result, size, &bytesRead, NULL))
+	{
+		// Error
+		DWORD err = GetLastError();
+		CloseHandle(fileHandle);
+		return NULL;
+	}
+
+	CloseHandle(fileHandle);
+	return result;
+#endif
+}
+
 void *ReadBinaryFile(const char *filename, size_t *length)
 {
 #ifndef _WIN32

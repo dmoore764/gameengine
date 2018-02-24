@@ -202,4 +202,4 @@ collada_node *ColladaFindNodeByID(collada_visual_scene *scene, const char *id);
 
 collada_animation *ColladaFindAnimationByTarget(collada_file *file, const char *target);
 void ColladaPrintNode(collada_node *node, int indent);
-collada_file ReadColladaFile(char *fileContents, memory_arena *arena);
+collada_file ReadColladaFile(char *fileName, memory_arena *arena);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "memory_arena.h"
 #include "stdio.h"
 
 //takes off the extension, doesn't remove the path, so it expects only filename.extension
@@ -18,6 +19,8 @@ void GetPath(char *dst, const char *basePath, ...);
 
 //Use c standard library to load file into a string, uses malloc, so the result can be freed later
 char *ReadFileIntoString(const char *filename);
+char *ReadFileIntoString(const char *filename, memory_arena *arena);
 
 //This is for binary files
 void *ReadBinaryFile(const char *filename, size_t *length);
+void *ReadBinaryFile(const char *filename, size_t *length, memory_arena *arena);

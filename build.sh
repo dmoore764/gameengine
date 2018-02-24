@@ -14,6 +14,7 @@ BUILD_FILES="
 	/Users/danielmoore/Github/gameengine/src/xml.cpp
 	/Users/danielmoore/Github/gameengine/src/collada.cpp
 	/Users/danielmoore/Github/gameengine/src/mesh.cpp
+	/Users/danielmoore/Github/gameengine/src/object3d.cpp
 "
 
 clang++ -g -glldb -O0 -std=c++11 -Wno-writable-strings $HEADER_SEARCH_PATHS $BUILD_FILES -o /Users/danielmoore/Github/gameengine/build/game $FRAMEWORK_SEARCH_PATHS -framework CoreServices -framework OpenGL -framework SDL2

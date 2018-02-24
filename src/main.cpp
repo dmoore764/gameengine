@@ -3,17 +3,28 @@
 #include "opengl.h"
 #include "compiler_helper.h"
 #include "game_math.h"
+#include "memory_arena.h"
+#include "collada.h"
+#include "mesh.h"
+#include "object3d.h"
 
 int main (int argCount, char **args)
 {
 	window w;
 	WinCreate(&w, V2I(640, 480));
 
-	quat q0 = CreateQuat(90, V3(0,0,1));
-	m4 q2m = QuatToM4(q0);
-	quat m2q = M4ToQuat(q2m);
-	v3 p = V3(1,0,0);
-	p = RotateByQuat(p, m2q);
+	glEnable(GL_DEPTH_TEST);
+
+	memory_arena arena;
+	InitArena(&arena, MEGABYTES(100));
+	collada_file bonetest = ReadColladaFile("../assets/meshes/bonetest.dae", &arena);
+	bone_model wormModel = BoneModelGetFromColladaByName(&bonetest, "Worm", &arena);
+	bone_model_instance wormInst = BoneModelInstanceNew(&wormModel);
+	object3d worm;
+	worm.type = OBJECT3D_BONE_MODEL;
+	worm.position = V3(0,10,0);
+	worm.rotation = CreateQuat(0, V3(0,0,1));
+	worm.boneModelInstance = wormInst;
 
 	m4 identity = M4();
 	m4 tx = MakeTranslation(10, 11, 12);
@@ -25,6 +36,10 @@ int main (int argCount, char **args)
 	shader s;
 	oglLoadShader(&s, "../shaders/solid_color_vert.glsl", "../shaders/solid_color_frag.glsl");
 	s.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
+
+	shader s1;
+	oglLoadShader(&s1, "../shaders/bone_model_vert.glsl", "../shaders/bone_model_frag.glsl");
+	s1.vertexAttributes = ATTR_POSITION | ATTR_NORMAL | ATTR_UV | ATTR_COLOR | ATTR_JOINT_WEIGHTS | ATTR_JOINT_INDICES;
 
 	basic_vertex vertData[3] = {
 		{{-3,30,0}, {0,0,0}, {0,0}, MAKE_COLOR(255,255,255,255)},
@@ -48,12 +63,35 @@ int main (int argCount, char **args)
 		}
 
 		WinClear(0,0,0);
-		glUseProgram(s.glHandle);
-		GLint perspView = glGetUniformLocation(s.glHandle, "PerspView");
-		glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 
-		glBindVertexArray(vao.vaoHandle);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		{
+			glUseProgram(s.glHandle);
+			GLint perspView = glGetUniformLocation(s.glHandle, "PerspView");
+			glUniformMatrix4fv(perspView, 1, false, &pv[0]);
+
+			glBindVertexArray(vao.vaoHandle);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+		}
+
+		{
+			Object3DUpdate(&worm, 0.016f);
+			Object3DCalculateModelMat(&worm);
+			glUseProgram(s1.glHandle);
+			GLint modelMat = glGetUniformLocation(s1.glHandle, "ModelMat");
+			GLint jointTransforms = glGetUniformLocation(s1.glHandle, "JointTransforms");
+			GLint perspView = glGetUniformLocation(s1.glHandle, "PerspView");
+			GLint lightDir = glGetUniformLocation(s1.glHandle, "LightDir");
+
+			glUniformMatrix4fv(modelMat, 1, false, &worm.modelMat[0]);
+			glUniformMatrix4fv(jointTransforms, worm.boneModelInstance.model->numJoints, false, &worm.boneModelInstance.boneTransforms[0][0]);
+			glUniformMatrix4fv(perspView, 1, false, &pv[0]);
+			v3 lightDirection = Normalize(V3(2,3,-1));
+			glUniform3fv(lightDir, 1, &lightDirection.x);
+
+			glBindVertexArray(worm.boneModelInstance.model->mesh.vaoHandle);
+			glDrawArrays(GL_TRIANGLES, 0, worm.boneModelInstance.model->mesh.numVertices);
+		}
+
 		WinSwapBuffers(&w);
 
 	}
