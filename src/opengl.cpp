@@ -5,6 +5,106 @@
 #include "stdlib.h"
 #include "stddef.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+internal_function void _SetTexParameters(uint32_t flags)
+{
+	GLenum target = GL_TEXTURE_2D;
+
+	if (flags & TEX_1D)
+		target = GL_TEXTURE_1D;
+	else if (flags & TEX_1D_ARRAY)
+		target = GL_TEXTURE_1D_ARRAY;
+	else if (flags & TEX_2D)
+		target = GL_TEXTURE_2D;
+	else if (flags & TEX_2D_ARRAY)
+		target = GL_TEXTURE_2D_ARRAY;
+	else if (flags & TEX_2D_MULTISAMPLE)
+		target = GL_TEXTURE_2D_MULTISAMPLE;
+	else if (flags & TEX_2D_MULTISAMPLE_ARRAY)
+		target = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+	else if (flags & TEX_CUBEMAP)
+		target = GL_TEXTURE_CUBE_MAP;
+	else if (flags & TEX_CUBEMAP_ARRAY)
+		target = GL_TEXTURE_CUBE_MAP_ARRAY;
+
+	if (flags & MAG_FILTERING_NEAREST)
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	else if (flags & MAG_FILTERING_LINEAR)
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	if (flags & MIN_FILTERING_NEAREST)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	else if (flags & MIN_FILTERING_LINEAR)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	else if (flags & MIN_FILTERING_MIPMAP_NEAREST)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	else if (flags & MIN_FILTERING_MIPMAP_LINEAR)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	else if (flags & MIN_FILTERING_2_MIPMAPS_NEAREST)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+	else if (flags & MIN_FILTERING_2_MIPMAPS_LINEAR)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	if (flags & CLAMP_TO_EDGE_S)
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	else if (flags & REPEAT_S)
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	else if (flags & MIRRORED_REPEAT_S)
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+
+	if (flags & CLAMP_TO_EDGE_T)
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	else if (flags & REPEAT_T)
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	else if (flags & MIRRORED_REPEAT_T)
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+}
+
+void oglLoadTexture2DIntoGPU(texture *t)
+{
+	SET_FLAG(t->loadFlags, TEX_LOADED);
+	t->lastUsed = 0xffffffff;
+
+	int n, w, h;
+	uint8_t *image_data = stbi_load(t->fileName, &w, &h, &n, 0);
+
+	t->size = V2I(w, h);
+	t->n = n;
+
+	glGenTextures(1, &t->glHandle);
+	glBindTexture(GL_TEXTURE_2D, t->glHandle);
+
+	_SetTexParameters(t->flags);
+
+	glTexImage2D(GL_TEXTURE_2D,
+				 0,								//mipmap level
+				 GL_RGBA,						//gl internal format
+				 w,
+				 h,
+				 0,								//border (must be 0)
+				 n == 3 ? GL_RGB : GL_RGBA,		//pixel data format
+				 GL_UNSIGNED_BYTE,				//pixel data type
+				 image_data);
+
+	if (t->loadFlags & TEX_SHOULD_GEN_MIPMAPS)
+		oglGenerateMipmaps(t);
+
+	stbi_image_free(image_data);
+}
+
+void oglGenerateMipmaps(texture *t)
+{
+	assert(t->loadFlags & TEX_LOADED);
+	assert(t->flags & (MIN_FILTERING_MIPMAP_NEAREST | 
+					   MIN_FILTERING_MIPMAP_LINEAR | 
+					   MIN_FILTERING_2_MIPMAPS_NEAREST | 
+					   MIN_FILTERING_2_MIPMAPS_LINEAR));
+	glBindTexture(GL_TEXTURE_2D, t->glHandle);
+	glGenerateMipmap(GL_TEXTURE_2D);
+}
+
 void oglLoadShader(shader *s, char *vertShaderFile, char *fragShaderFile)
 {
 	char *vertSrc = ReadFileIntoString(vertShaderFile);
@@ -72,6 +172,7 @@ void oglLoadShader(shader *s, char *vertShaderFile, char *fragShaderFile)
 
 void oglCreateVAOWithData(vertex_array_object *vao, vertex_type type, int numVertices, void *data)
 {
+	vao->type = VAO_DRAW_ARRAYS;
 	vao->numVertices = numVertices;
 
 	glGenVertexArrays(1, &vao->vaoHandle);
@@ -130,5 +231,21 @@ void oglCreateVAOWithData(vertex_array_object *vao, vertex_type type, int numVer
 			glEnableVertexAttribArray(LAYOUT_LOC_JOINT_INDICES);
 		} break;
 	}
+
+	glBindVertexArray(0);
 }
 
+void oglCreateVAOWithData(vertex_array_object *vao, vertex_type type, int numVertices, void *data, int numIndices, void *indices)
+{
+	oglCreateVAOWithData(vao, type, numVertices, data);
+	vao->type = VAO_DRAW_ELEMENTS;
+	vao->numIndices = numIndices;
+
+	glBindVertexArray(vao->vaoHandle);
+
+	glGenBuffers(1, &vao->ebHandle);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->ebHandle);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)*numIndices, indices, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+}

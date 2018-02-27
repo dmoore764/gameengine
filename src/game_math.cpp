@@ -385,7 +385,7 @@ m4 MakePerspective(float fov, float aspect, float n, float f)
 {
 	m4 result = M4(0.0f);
 
-	float t = n * tanf (fov/2.0f);
+	float t = n * tanf ((fov*DEGREES_TO_RADIANS)/2.0f);
 	float r = aspect * t;
 
 	result.col[0].x = SafeDivide(n,r);

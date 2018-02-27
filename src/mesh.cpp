@@ -1,6 +1,7 @@
 #include "mesh.h"
 #include "string.h"
 #include "compiler_helper.h"
+#include "stdio.h"
 
 int BoneModelSetJointChildren(bone_joint *joints, int numJoints, collada_node *node, memory_arena *arena)
 {
@@ -73,7 +74,7 @@ bone_model BoneModelGetFromColladaByName(collada_file *file, const char *name, m
 	}
 	assert(geometry); //same as for controller
 
-	skeletal_vertex *verts = (skeletal_vertex *)malloc(sizeof(skeletal_vertex) * geometry->numPolys * 3);
+	skeletal_vertex *verts = (skeletal_vertex *)calloc(sizeof(skeletal_vertex) * geometry->numPolys * 3, 1);
 
 	int currentVert = 0;
 	for (int i = 0; i < geometry->numPolys; i++)
@@ -156,7 +157,73 @@ bone_model BoneModelGetFromColladaByName(collada_file *file, const char *name, m
 		}
 	}
 
-	oglCreateVAOWithData(&result.mesh, SKELETAL_VERTEX, currentVert, verts);
+	int *originalIndices = (int *)alloca(sizeof(int)*currentVert);
+	for (int i = 0; i < currentVert; i++)
+		originalIndices[i] = -1;
+	int *remappedIndices = (int *)alloca(sizeof(int)*currentVert);
+
+	int *indexData = (int *)alloca(sizeof(int)*currentVert);
+
+	//check for duplicate vertices
+	int currentUnique = 0;
+	for (int i = 0; i < currentVert - 1; i++)
+	{
+		if (originalIndices[i] != -1) //don't look for duplicates of a duplicate
+			continue;
+
+		//map the first occurance of a vertex to the next slot
+		remappedIndices[i] = currentUnique;
+
+		//then map all the next occurances to the same slot, and note the original vertex
+		for (int j = i + 1; j < currentVert; j++)
+		{
+			if (originalIndices[j] != -1) //if we already found a duplicate, skip
+				continue;
+
+			skeletal_vertex *vA = &verts[i];
+			skeletal_vertex *vB = &verts[j];
+
+			if (memcmp(vA, vB, sizeof(skeletal_vertex)) == 0)
+			{
+				originalIndices[j] = i;
+				remappedIndices[j] = currentUnique;
+			}
+		}
+
+		currentUnique++;
+	}
+
+	//create the index buffer
+	for (int i = 0; i < currentVert; i++)
+	{
+		indexData[i] = remappedIndices[i];
+	}
+
+	//create the new vertex buffer
+	skeletal_vertex *newVerts = (skeletal_vertex *)malloc(sizeof(skeletal_vertex)*currentUnique);
+
+	for (int i = 0; i < currentVert; i++)
+	{
+		if (originalIndices[i] == -1)
+		{
+			newVerts[remappedIndices[i]] = verts[i];
+		}
+	}
+	free(verts);
+
+	oglCreateVAOWithData(&result.mesh, SKELETAL_VERTEX, currentUnique, newVerts, currentVert, indexData);
+	free(newVerts);
+
+	/*for (int i = 0; i < currentVert; i++)
+	{
+		skeletal_vertex *v = &verts[i];
+		printf("Vert %d\n", i);
+		printf("pos: %.2f, %.2f, %.2f\n", v->position.x, v->position.y, v->position.z);
+		printf("normal: %.2f, %.2f, %.2f\n", v->normal.x, v->normal.y, v->normal.z);
+		printf("uv: %.2f, %.2f\n", v->uv.x, v->uv.y);
+		printf("weights: %.2f, %.2f, %.2f\n", v->weights[0], v->weights[1], v->weights[2]);
+		printf("indices: %d, %d, %d\n", v->jointIndices[0], v->jointIndices[1], v->jointIndices[2]);
+	}*/
 
 	//Set up bones
 	

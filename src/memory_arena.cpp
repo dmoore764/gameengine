@@ -6,7 +6,16 @@ void InitArena(memory_arena *arena, size_t size)
 {
 	arena->size = size;
 	arena->memory = calloc(size, 1);
-	arena->current = arena->memory;
+	uint32_t *data = (uint32_t *)arena->memory;
+	for (int i = 0; i < size >> 2; i++)
+	{
+		*data = 0xdeadbeef;
+		data++;
+	}
+	
+	//align to 4 bytes
+	size_t addr = (size_t)arena->memory + 32;
+	arena->current = (void *)(addr - (addr % 32));
 }
 
 transient_arena GetTransientArena(memory_arena *arena)
@@ -24,8 +33,9 @@ void FreeTransientArena(transient_arena ta)
 
 void *_PushData(memory_arena *arena, size_t size)
 {
-	assert((char *)arena->current + size < (char *)arena->memory + arena->size);
-	void *result = arena->current;
-	arena->current = (void *)((char *)arena->current + size);
+	assert((char *)arena->current + size + 32 < (char *)arena->memory + arena->size);
+	size_t addr = (size_t)arena->current + 32;
+	void *result = (void *)(addr - (addr % 32));
+	arena->current = (void *)((char *)result + size);
 	return result;
 }

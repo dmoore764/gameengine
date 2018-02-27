@@ -16,3 +16,6 @@
 #define global_variable static
 #define internal_function static
 #define local_persistent static
+
+#define SET_FLAG(VAR, FLAG) (VAR |= FLAG)
+#define UNSET_FLAG(VAR, FLAG) (VAR &= ~FLAG)
