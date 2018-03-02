@@ -62,21 +62,80 @@ internal_function void _SetTexParameters(uint32_t flags)
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 }
 
+void oglGenerateNew2DTexture(texture *t, v2i size)
+{
+	SET_FLAG(t->loadFlags, TEX_LOADED);
+	t->size = size;
+	glGenTextures(1, &t->glHandle);
+	glBindTexture(GL_TEXTURE_2D, t->glHandle);
+
+	_SetTexParameters(t->flags);
+	
+	GLint internalFormat = GL_RGBA;
+	GLenum format = GL_RGBA;
+	GLenum type = GL_UNSIGNED_BYTE;
+	if (t->storageFlags & STORAGE_R)
+	{
+		if (t->storageFlags & STORAGE_UNSIGNED_BYTE)
+			internalFormat = GL_R8;
+		if (t->storageFlags & STORAGE_FLOAT_16)
+		{
+			internalFormat = GL_R16F;
+			type = GL_FLOAT;
+		}
+
+		format = GL_RED;
+	}
+	else if (t->storageFlags & STORAGE_RGB)
+	{
+		if (t->storageFlags & STORAGE_UNSIGNED_BYTE)
+			internalFormat = GL_RGB8;
+		if (t->storageFlags & STORAGE_FLOAT_16)
+		{
+			internalFormat = GL_RGB16F;
+			type = GL_FLOAT;
+		}
+
+		format = GL_RGB;
+	}
+	else if (t->storageFlags & STORAGE_RGBA)
+	{
+		if (t->storageFlags & STORAGE_UNSIGNED_BYTE)
+			internalFormat = GL_RGB8;
+		if (t->storageFlags & STORAGE_FLOAT_16)
+		{
+			internalFormat = GL_RGB16F;
+			type = GL_FLOAT;
+		}
+
+		format = GL_RGBA;
+	}
+	else if (t->storageFlags & STORAGE_DEPTH_STENCIL)
+	{
+		internalFormat = GL_DEPTH24_STENCIL8;
+		format = GL_DEPTH_STENCIL;
+		type = GL_UNSIGNED_INT_24_8;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.w, size.h, 0, format, type, 0);
+}
+
 void oglLoadTexture2DIntoGPU(texture *t)
 {
 	SET_FLAG(t->loadFlags, TEX_LOADED);
 	t->lastUsed = 0xffffffff;
 
+	glGenTextures(1, &t->glHandle);
+	glBindTexture(GL_TEXTURE_2D, t->glHandle);
+
+	_SetTexParameters(t->flags);
+
+	assert (t->loadFlags & TEX_FROM_FILE);
 	int n, w, h;
 	uint8_t *image_data = stbi_load(t->fileName, &w, &h, &n, 0);
 
 	t->size = V2I(w, h);
 	t->n = n;
-
-	glGenTextures(1, &t->glHandle);
-	glBindTexture(GL_TEXTURE_2D, t->glHandle);
-
-	_SetTexParameters(t->flags);
 
 	glTexImage2D(GL_TEXTURE_2D,
 				 0,								//mipmap level
@@ -103,6 +162,41 @@ void oglGenerateMipmaps(texture *t)
 					   MIN_FILTERING_2_MIPMAPS_LINEAR));
 	glBindTexture(GL_TEXTURE_2D, t->glHandle);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	SET_FLAG(t->loadFlags, TEX_MIPMAPS_GENERATED);
+}
+
+void oglGenerateFrameBuffer(framebuffer *fb, uint32_t texFlags, v2i size, bool genColor, bool genDepthStencil, uint32_t colorFormat)
+{
+    glGenFramebuffers(1, &fb->glHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb->glHandle);
+
+	memset(&fb->color, '\0', sizeof(texture));
+	memset(&fb->depthStencil, '\0', sizeof(texture));
+
+	assert(genColor || genDepthStencil);
+
+	if (genColor)
+	{
+		fb->color.storageFlags = colorFormat;
+		fb->color.flags = texFlags;
+		oglGenerateNew2DTexture(&fb->color, size);
+		//TODO: change this to allow different types of textures?
+		assert(texFlags & TEX_2D);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb->color.glHandle, 0);
+	}
+	if (genDepthStencil)
+	{
+		fb->depthStencil.storageFlags = STORAGE_DEPTH_STENCIL;
+		fb->depthStencil.size = size;
+		glGenRenderbuffers(1, &fb->depthStencil.glHandle);
+		glBindRenderbuffer(GL_RENDERBUFFER, fb->depthStencil.glHandle);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.w, size.h);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fb->depthStencil.glHandle);
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        printf("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void oglLoadShader(shader *s, char *vertShaderFile, char *fragShaderFile)

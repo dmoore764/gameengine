@@ -1,4 +1,5 @@
 #include "render.h"
+#include "compiler_helper.h"
 
 void rendSetTexture(texture *t, uint32_t gameTime, int slot)
 {
@@ -6,6 +7,12 @@ void rendSetTexture(texture *t, uint32_t gameTime, int slot)
 	if (!(t->loadFlags & TEX_LOADED))
 	{
 		oglLoadTexture2DIntoGPU(t);
+	}
+
+	if ((t->flags & (MIN_FILTERING_2_MIPMAPS_LINEAR | MIN_FILTERING_MIPMAP_LINEAR | MIN_FILTERING_MIPMAP_NEAREST | MIN_FILTERING_2_MIPMAPS_NEAREST)) && !(t->loadFlags & (TEX_MIPMAPS_GENERATED | TEX_MIPMAPS_LOADED)))
+	{
+		//trying to use a texture with no mipmaps, despite a min filtering that specifies it
+		assert(false);
 	}
 
 	glActiveTexture(slot);

@@ -28,6 +28,14 @@ int main (int argCount, char **args)
 	worm.rotation = CreateQuat(0, V3(0,0,1));
 	worm.boneModelInstance = wormInst;
 
+	framebuffer gameScreen;
+	oglGenerateFrameBuffer(&gameScreen, MAG_FILTERING_NEAREST | MIN_FILTERING_NEAREST | CLAMP_TO_EDGE_S | CLAMP_TO_EDGE_T | TEX_2D, V2I(1024, 1024), true, true, STORAGE_RGB | STORAGE_FLOAT_16);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gameScreen.glHandle);
+	glClearColor(1, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	texture uvTex = {};
 	uvTex.fileName = "../assets/textures/UVMap.png";
 	uvTex.flags = MAG_FILTERING_NEAREST | MIN_FILTERING_MIPMAP_LINEAR | CLAMP_TO_EDGE_S | CLAMP_TO_EDGE_T | TEX_2D;
@@ -37,15 +45,36 @@ int main (int argCount, char **args)
 	oglLoadShader(&s, "../shaders/solid_color_vert.glsl", "../shaders/solid_color_frag.glsl");
 	s.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
 
+	shader texturedTriangles = {};
+	oglLoadShader(&texturedTriangles, "../shaders/textured_vert.glsl", "../shaders/textured_frag.glsl");
+	texturedTriangles.vertexAttributes = ATTR_POSITION | ATTR_UV | ATTR_COLOR;
+
 	shader s1 = {};
 	oglLoadShader(&s1, "../shaders/bone_model_vert.glsl", "../shaders/bone_model_frag.glsl");
 	s1.vertexAttributes = ATTR_POSITION | ATTR_NORMAL | ATTR_UV | ATTR_COLOR | ATTR_JOINT_WEIGHTS | ATTR_JOINT_INDICES;
 
+	/*
 	basic_vertex vertData[4] = {
 		{{-1,2,0}, {0,0,0}, {0,0}, MAKE_COLOR(255,255,255,255)},
 		{{1,2,0}, {0,0,0}, {0,0}, MAKE_COLOR(0,255,255,255)},
 		{{1,2,2}, {0,0,0}, {0,0}, MAKE_COLOR(255,0,255,255)},
 		{{-1,2,2}, {0,0,0}, {0,0}, MAKE_COLOR(255,0,255,255)},
+	};
+
+	uint32_t indexData[6] = {
+		0, 1, 3, 1, 2, 3
+	};
+
+	vertex_array_object vao = {};
+
+	oglCreateVAOWithData(&vao, BASIC_VERTEX, 4, vertData, 6, indexData);
+	*/
+
+	basic_vertex vertData[4] = {
+		{{-1,2,0}, {0,0,0}, {0,0}, MAKE_COLOR(255,255,255,255)},
+		{{1,2,0},  {0,0,0}, {0,1}, MAKE_COLOR(255,255,255,255)},
+		{{1,2,2},  {0,0,0}, {1,1}, MAKE_COLOR(255,255,255,255)},
+		{{-1,2,2}, {0,0,0}, {1,0}, MAKE_COLOR(255,255,255,255)},
 	};
 
 	uint32_t indexData[6] = {
@@ -88,9 +117,10 @@ int main (int argCount, char **args)
 		m4 pv = ps*la;
 
 		{
-			glUseProgram(s.glHandle);
-			GLint perspView = glGetUniformLocation(s.glHandle, "PerspView");
+			glUseProgram(texturedTriangles.glHandle);
+			GLint perspView = glGetUniformLocation(texturedTriangles.glHandle, "PerspView");
 			glUniformMatrix4fv(perspView, 1, false, &pv[0]);
+			rendSetTexture(&gameScreen.color, gameTime);
 
 			rendRenderVAO(&vao);
 		}
