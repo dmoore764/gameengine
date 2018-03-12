@@ -2,6 +2,7 @@
 #include "mesh.h"
 #include "memory_arena.h"
 #include "hash.h"
+#include "opengl.h"
 
 struct assets
 {
@@ -24,6 +25,15 @@ struct assets
 
 	generic_hash boneModelHash;
 	generic_hash basicMeshHash;
+
+	shader basicMeshColoredVerts;
+	shader hiddenMeshColoredVerts;
+	shader texturedTriangles;
+	shader basicMeshSolidColor;
+	shader outlineDrawer;
+	shader boneModel;
+
+	texture uvTex;
 };
 
 void assLoad(assets *ass, memory_arena *arena);

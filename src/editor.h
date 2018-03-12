@@ -72,6 +72,7 @@ struct obj3d_editor
 	quat rotation;
 	v3 scale;
 	m4 modelMat;
+	vertex_array_object *curVao;
 
 	int numLODs;
 	obj3d_mesh_assignment lods[5];

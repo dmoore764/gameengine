@@ -50,30 +50,9 @@ int main (int argCount, char **args)
 	framebuffer gameScreen;
 	oglGenerateFrameBuffer(&gameScreen, MAG_FILTERING_NEAREST | MIN_FILTERING_NEAREST | CLAMP_TO_EDGE_S | CLAMP_TO_EDGE_T | TEX_2D, V2I(1024, 1024), true, true, STORAGE_RGB | STORAGE_FLOAT_16);
 
-	texture uvTex = {};
-	uvTex.fileName = "../assets/textures/UVMap.png";
-	uvTex.flags = MAG_FILTERING_NEAREST | MIN_FILTERING_MIPMAP_LINEAR | CLAMP_TO_EDGE_S | CLAMP_TO_EDGE_T | TEX_2D;
-	uvTex.loadFlags = TEX_FROM_FILE | TEX_SHOULD_GEN_MIPMAPS;
+	framebuffer outlineDrawScreen;
+	oglGenerateFrameBuffer(&outlineDrawScreen, MAG_FILTERING_NEAREST | MIN_FILTERING_NEAREST | CLAMP_TO_EDGE_S | CLAMP_TO_EDGE_T | TEX_2D, V2I(1024, 1024), true, false, STORAGE_R | STORAGE_UNSIGNED_BYTE);
 
-	shader s = {};
-	oglLoadShader(&s, "../shaders/solid_color_vert.glsl", "../shaders/solid_color_frag.glsl");
-	s.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
-
-	shader basicMeshColoredVerts = {};
-	oglLoadShader(&basicMeshColoredVerts, "../shaders/basic_mesh_colored_verts_vert.glsl", "../shaders/basic_mesh_colored_verts_frag.glsl");
-	basicMeshColoredVerts.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
-
-	shader hiddenMeshColoredVerts = {};
-	oglLoadShader(&hiddenMeshColoredVerts, "../shaders/hidden_mesh_colored_verts_vert.glsl", "../shaders/hidden_mesh_colored_verts_frag.glsl");
-	hiddenMeshColoredVerts.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
-
-	shader texturedTriangles = {};
-	oglLoadShader(&texturedTriangles, "../shaders/textured_vert.glsl", "../shaders/textured_frag.glsl");
-	texturedTriangles.vertexAttributes = ATTR_POSITION | ATTR_UV | ATTR_COLOR;
-
-	shader s1 = {};
-	oglLoadShader(&s1, "../shaders/bone_model_vert.glsl", "../shaders/bone_model_frag.glsl");
-	s1.vertexAttributes = ATTR_POSITION | ATTR_NORMAL | ATTR_UV | ATTR_COLOR | ATTR_JOINT_WEIGHTS | ATTR_JOINT_INDICES;
 
 	int indexData[6] = { 0, 2, 3, 0, 1, 2};
 
@@ -87,6 +66,9 @@ int main (int argCount, char **args)
 	oglCreateVAOWithData(&vaoFullScreen, BASIC_VERTEX, 4, vertDataFullScreen, 6, indexData);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
 
 	bool running = true;
 	while (running)
@@ -138,12 +120,38 @@ int main (int argCount, char **args)
 
 		//game->physWorld.dynamicsWorld->stepSimulation(1 / 60.f, 10);
 
+		if (edit && edit->curVao)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, outlineDrawScreen.glHandle);
+			glViewport(0,0,outlineDrawScreen.color.size.w, outlineDrawScreen.color.size.h);
+			glClearColor(0,0,0,0);
+			glDisable(GL_DEPTH_TEST);
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			glUseProgram(game->ass.basicMeshSolidColor.glHandle);
+			GLint perspView = glGetUniformLocation(game->ass.basicMeshSolidColor.glHandle, "PerspView");
+			GLint modelMat = glGetUniformLocation(game->ass.basicMeshSolidColor.glHandle, "ModelMat");
+			GLint meshColor = glGetUniformLocation(game->ass.basicMeshSolidColor.glHandle, "MeshColor");
+			glUniformMatrix4fv(perspView, 1, false, &pv[0]);
+			glUniformMatrix4fv(modelMat, 1, false, &edit->modelMat[0]);
+			v4 col = V4(1,1,1,1);
+			glUniform4fv(meshColor, 1, (float *)&col.x);
+			rendRenderVAO(edit->curVao);
+			glEnable(GL_DEPTH_TEST);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0,0, w.backingRes.w, w.backingRes.h);
+		}
+
+		glClearColor(0,0,0,1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		//Draw all the objects
 		for (int i = 0; i < numObjects; i++)
 		{
 			obj3d_editor *obj = &objects[i];
-			vertex_array_object *vao = NULL;
 			obj->modelMat = RotationPositionScaleToM4(obj->rotation, obj->position, obj->scale);
+			obj->curVao = NULL;
 			switch ((object3d_types)obj->objType)
 			{
 				case object3d_types::NON_VISUAL:
@@ -156,7 +164,7 @@ int main (int argCount, char **args)
 					{
 						bone_model *bm = (bone_model *)GetFromHash(&game->ass.boneModelHash, obj->lods[0].name);
 						if (bm)
-							vao = &bm->mesh;
+							obj->curVao = &bm->mesh;
 					}
 				} break;
 
@@ -166,19 +174,19 @@ int main (int argCount, char **args)
 					{
 						basic_mesh *bm = (basic_mesh *)GetFromHash(&game->ass.basicMeshHash, obj->lods[0].name);
 						if (bm)
-							vao = &bm->mesh;
+							obj->curVao = &bm->mesh;
 					}
 				} break;
 			}
 
-			if (vao)
+			if (obj->curVao)
 			{
-				glUseProgram(basicMeshColoredVerts.glHandle);
-				GLint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-				GLint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+				glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+				GLint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+				GLint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 				glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 				glUniformMatrix4fv(modelMat, 1, false, &obj->modelMat[0]);
-				rendRenderVAO(vao);
+				rendRenderVAO(obj->curVao);
 			}
 		}
 
@@ -189,9 +197,9 @@ int main (int argCount, char **args)
 			{
 				m4 model = RotationPositionToM4(edit->rotation, edit->position);
 
-				glUseProgram(basicMeshColoredVerts.glHandle);
-				GLint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-				GLint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+				glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+				GLint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+				GLint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 				glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
@@ -441,9 +449,9 @@ int main (int argCount, char **args)
 						model = M4();
 					model.col[3] = V4(edit->position.x, edit->position.y, edit->position.z, 1.0f);
 
-					glUseProgram(basicMeshColoredVerts.glHandle);
-					GLint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-					GLint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+					glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+					GLint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+					GLint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 					glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 					glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 
@@ -451,9 +459,9 @@ int main (int argCount, char **args)
 					rendRenderVAO(&game->ass.manipulatorY.mesh);
 					rendRenderVAO(&game->ass.manipulatorZ.mesh);
 
-					glUseProgram(hiddenMeshColoredVerts.glHandle);
-					perspView = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "PerspView");
-					modelMat = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "ModelMat");
+					glUseProgram(game->ass.hiddenMeshColoredVerts.glHandle);
+					perspView = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "PerspView");
+					modelMat = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "ModelMat");
 					glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 					glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 					glDepthFunc(GL_GREATER);
@@ -478,9 +486,9 @@ int main (int argCount, char **args)
 							model = M4();
 						model.col[3] = V4(edit->position.x, edit->position.y, edit->position.z, 1.0f);
 
-						glUseProgram(basicMeshColoredVerts.glHandle);
-						GLint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-						GLint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+						glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+						GLint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+						GLint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 						glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 						glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 
@@ -488,9 +496,9 @@ int main (int argCount, char **args)
 						rendRenderVAO(&game->ass.manipulatorY.mesh);
 						rendRenderVAO(&game->ass.manipulatorZ.mesh);
 
-						glUseProgram(hiddenMeshColoredVerts.glHandle);
-						perspView = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "PerspView");
-						modelMat = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "ModelMat");
+						glUseProgram(game->ass.hiddenMeshColoredVerts.glHandle);
+						perspView = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "PerspView");
+						modelMat = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "ModelMat");
 						glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 						glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 						glDepthFunc(GL_GREATER);
@@ -537,9 +545,9 @@ int main (int argCount, char **args)
 							axisPlaneToDraw = &game->ass.zaxis.mesh;
 						}
 
-						glUseProgram(basicMeshColoredVerts.glHandle);
-						GLuint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-						GLuint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+						glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+						GLuint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+						GLuint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 						glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 						m4 model;
 						if (localHandle)
@@ -551,9 +559,9 @@ int main (int argCount, char **args)
 						rendRenderVAO(axisPlaneToDraw);
 						rendRenderVAO(axisToDraw);
 
-						glUseProgram(hiddenMeshColoredVerts.glHandle);
-						perspView = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "PerspView");
-						modelMat = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "ModelMat");
+						glUseProgram(game->ass.hiddenMeshColoredVerts.glHandle);
+						perspView = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "PerspView");
+						modelMat = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "ModelMat");
 						glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 						glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 						glDepthFunc(GL_GREATER);
@@ -641,9 +649,9 @@ int main (int argCount, char **args)
 							edit->rotation = RotateQuatByQuat(objRotator.initialRotation, newRotation);
 						}
 
-						glUseProgram(basicMeshColoredVerts.glHandle);
-						GLuint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-						GLuint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+						glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+						GLuint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+						GLuint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 						glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 						m4 model;
 						if (localHandle)
@@ -655,9 +663,9 @@ int main (int argCount, char **args)
 						rendRenderVAO(objRotator.axisPlaneToDraw);
 						rendRenderVAO(objRotator.axisToDraw);
 
-						glUseProgram(hiddenMeshColoredVerts.glHandle);
-						perspView = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "PerspView");
-						modelMat = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "ModelMat");
+						glUseProgram(game->ass.hiddenMeshColoredVerts.glHandle);
+						perspView = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "PerspView");
+						modelMat = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "ModelMat");
 						glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 						glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 						glDepthFunc(GL_GREATER);
@@ -674,9 +682,9 @@ int main (int argCount, char **args)
 				m4 model;
 				model = RotationPositionToM4(edit->rotation, edit->position);
 
-				glUseProgram(basicMeshColoredVerts.glHandle);
-				GLint perspView = glGetUniformLocation(basicMeshColoredVerts.glHandle, "PerspView");
-				GLint modelMat = glGetUniformLocation(basicMeshColoredVerts.glHandle, "ModelMat");
+				glUseProgram(game->ass.basicMeshColoredVerts.glHandle);
+				GLint perspView = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "PerspView");
+				GLint modelMat = glGetUniformLocation(game->ass.basicMeshColoredVerts.glHandle, "ModelMat");
 				glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 				glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 
@@ -684,9 +692,9 @@ int main (int argCount, char **args)
 				rendRenderVAO(&game->ass.manipulatorY.mesh);
 				rendRenderVAO(&game->ass.manipulatorZ.mesh);
 
-				glUseProgram(hiddenMeshColoredVerts.glHandle);
-				perspView = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "PerspView");
-				modelMat = glGetUniformLocation(hiddenMeshColoredVerts.glHandle, "ModelMat");
+				glUseProgram(game->ass.hiddenMeshColoredVerts.glHandle);
+				perspView = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "PerspView");
+				modelMat = glGetUniformLocation(game->ass.hiddenMeshColoredVerts.glHandle, "ModelMat");
 				glUniformMatrix4fv(perspView, 1, false, &pv[0]);
 				glUniformMatrix4fv(modelMat, 1, false, &model[0]);
 				glDepthFunc(GL_GREATER);
@@ -712,6 +720,19 @@ int main (int argCount, char **args)
 			rendRenderVAO(&vaoFullScreen);
 		}
 		*/
+
+		{
+			glUseProgram(game->ass.outlineDrawer.glHandle);
+			GLint perspView = glGetUniformLocation(game->ass.outlineDrawer.glHandle, "PerspView");
+			GLint resolution = glGetUniformLocation(game->ass.outlineDrawer.glHandle, "Resolution");
+			m4 identity = M4();
+			glUniformMatrix4fv(perspView, 1, false, &identity[0]);
+			v2 res = V2(outlineDrawScreen.color.size.w, outlineDrawScreen.color.size.h);
+			glUniform2fv(resolution, 1, (float *)&res.x);
+			rendSetTexture(&outlineDrawScreen.color, gameTime);
+
+			rendRenderVAO(&vaoFullScreen);
+		}
 
 		local_persistent bool showDebug = true;
 		local_persistent bool tabWasDown = false;

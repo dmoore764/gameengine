@@ -45,4 +45,29 @@ void assLoad(assets *ass, memory_arena *arena)
 	AddToHash(&ass->basicMeshHash, &ass->manipulatorY, "editorAssetManipulatorY");
 	ass->manipulatorZ = BasicMeshGetFromColladaByName(&manipulator, "ZAxis", arena);
 	AddToHash(&ass->basicMeshHash, &ass->manipulatorZ, "editorAssetManipulatorZ");
+
+	//Shader loading
+	oglLoadShader(&ass->basicMeshColoredVerts, "../shaders/basic_mesh_colored_verts_vert.glsl", "../shaders/basic_mesh_colored_verts_frag.glsl");
+	ass->basicMeshColoredVerts.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
+
+	oglLoadShader(&ass->hiddenMeshColoredVerts, "../shaders/hidden_mesh_colored_verts_vert.glsl", "../shaders/hidden_mesh_colored_verts_frag.glsl");
+	ass->hiddenMeshColoredVerts.vertexAttributes = ATTR_POSITION | ATTR_COLOR;
+
+	oglLoadShader(&ass->texturedTriangles, "../shaders/textured_vert.glsl", "../shaders/textured_frag.glsl");
+	ass->texturedTriangles.vertexAttributes = ATTR_POSITION | ATTR_UV | ATTR_COLOR;
+
+	oglLoadShader(&ass->basicMeshSolidColor, "../shaders/basic_mesh_solid_color_vert.glsl", "../shaders/basic_mesh_solid_color_frag.glsl");
+	ass->basicMeshSolidColor.vertexAttributes = ATTR_POSITION;
+
+	oglLoadShader(&ass->outlineDrawer, "../shaders/outline_drawer_vert.glsl", "../shaders/outline_drawer_frag.glsl");
+	ass->outlineDrawer.vertexAttributes = ATTR_POSITION | ATTR_UV;
+
+	oglLoadShader(&ass->boneModel, "../shaders/bone_model_vert.glsl", "../shaders/bone_model_frag.glsl");
+	ass->boneModel.vertexAttributes = ATTR_POSITION | ATTR_NORMAL | ATTR_UV | ATTR_COLOR | ATTR_JOINT_WEIGHTS | ATTR_JOINT_INDICES;
+
+
+	//Texture specification
+	ass->uvTex.fileName = "../assets/textures/UVMap.png";
+	ass->uvTex.flags = MAG_FILTERING_NEAREST | MIN_FILTERING_MIPMAP_LINEAR | CLAMP_TO_EDGE_S | CLAMP_TO_EDGE_T | TEX_2D;
+	ass->uvTex.loadFlags = TEX_FROM_FILE | TEX_SHOULD_GEN_MIPMAPS;
 }
