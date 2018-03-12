@@ -3,6 +3,137 @@
 #include "compiler_helper.h"
 #include "stdio.h"
 
+basic_mesh BasicMeshGetFromColladaByName(collada_file *file, const char *name, memory_arena *arena)
+{
+	basic_mesh result;
+	collada_node *instance = ColladaGetSceneObjectByName(&file->visualScenes[0], name);
+	assert(instance);
+	assert(instance->contentType == COLLADA_INSTANCE_GEOMETRY);
+
+	collada_geometry *geometry = NULL;
+	for (int i = 0; i < file->numGeometries; i++)
+	{
+		if (strcmp(file->geometries[i].id, instance->instanceGeometry.meshURL) == 0)
+		{
+			geometry = &file->geometries[i];
+			break;
+		}
+	}
+	assert(geometry);
+
+	basic_vertex *verts = (basic_vertex *)calloc(sizeof(basic_vertex) * geometry->numPolys * 3, 1);
+
+	int currentVert = 0;
+	for (int i = 0; i < geometry->numPolys; i++)
+	{
+		for (int v = 0; v < 3; v++)
+		{
+			basic_vertex *cur = &verts[currentVert++];
+			cur->color = MAKE_COLOR(255, 255, 255, 255);
+			for (int s = 0; s < geometry->numSemantics; s++)
+			{
+				if (geometry->semantics[s].semantic[0] == 'V')
+				{
+					int index = geometry->polys[i].vert[v].position_index;
+					collada_source_array *source = &geometry->sources[geometry->semantics[s].source_index];
+					cur->position.x = source->values[index*source->stride + 0];
+					cur->position.y = source->values[index*source->stride + 1];
+					cur->position.z = source->values[index*source->stride + 2];
+				}
+				else if (geometry->semantics[s].semantic[0] == 'N') //Normal
+				{
+					int index = geometry->polys[i].vert[v].normal_index;
+					collada_source_array *source = &geometry->sources[geometry->semantics[s].source_index];
+					cur->normal.x = source->values[index*source->stride + 0];
+					cur->normal.y = source->values[index*source->stride + 1];
+					cur->normal.z = source->values[index*source->stride + 2];
+				}
+				else if (geometry->semantics[s].semantic[0] == 'T') //Texcoord
+				{
+					if (geometry->semantics[s].set == 0)
+					{
+						int index = geometry->polys[i].vert[v].map_index[0];
+						collada_source_array *source = &geometry->sources[geometry->semantics[s].source_index];
+						cur->uv.x = source->values[index*source->stride + 0];
+						cur->uv.y = 1 - source->values[index*source->stride + 1];
+					}
+				}
+				else if (geometry->semantics[s].semantic[0] == 'C') //Color
+				{
+					if (geometry->semantics[s].set == 0)
+					{
+						int index = geometry->polys[i].vert[v].color_index[0];
+						collada_source_array *source = &geometry->sources[geometry->semantics[s].source_index];
+						float r = source->values[index*source->stride + 0];
+						float g = source->values[index*source->stride + 1];
+						float b = source->values[index*source->stride + 2];
+						cur->color = MAKE_COLOR((uint8_t)(r * 255.0f), (uint8_t)(g * 255.0f), (uint8_t)(b * 255.0f), 255);
+					}
+				}
+			}
+		}
+	}
+
+	int *originalIndices = (int *)alloca(sizeof(int)*currentVert);
+	for (int i = 0; i < currentVert; i++)
+		originalIndices[i] = -1;
+	int *remappedIndices = (int *)alloca(sizeof(int)*currentVert);
+
+	int *indexData = (int *)alloca(sizeof(int)*currentVert);
+
+	//check for duplicate vertices
+	int currentUnique = 0;
+	for (int i = 0; i < currentVert; i++)
+	{
+		if (originalIndices[i] != -1) //don't look for duplicates of a duplicate
+			continue;
+
+		//map the first occurance of a vertex to the next slot
+		remappedIndices[i] = currentUnique;
+
+		//then map all the next occurances to the same slot, and note the original vertex
+		for (int j = i + 1; j < currentVert; j++)
+		{
+			if (originalIndices[j] != -1) //if we already found a duplicate, skip
+				continue;
+
+			basic_vertex *vA = &verts[i];
+			basic_vertex *vB = &verts[j];
+
+			if (memcmp(vA, vB, sizeof(skeletal_vertex)) == 0)
+			{
+				originalIndices[j] = i;
+				remappedIndices[j] = currentUnique;
+			}
+		}
+
+		currentUnique++;
+	}
+
+	//create the index buffer
+	for (int i = 0; i < currentVert; i++)
+	{
+		indexData[i] = remappedIndices[i];
+	}
+
+	//create the new vertex buffer
+	basic_vertex *newVerts = (basic_vertex *)malloc(sizeof(basic_vertex)*currentUnique);
+
+	for (int i = 0; i < currentVert; i++)
+	{
+		if (originalIndices[i] == -1)
+		{
+			newVerts[remappedIndices[i]] = verts[i];
+		}
+	}
+	free(verts);
+
+	oglCreateVAOWithData(&result.mesh, BASIC_VERTEX, currentUnique, newVerts, currentVert, indexData);
+	free(newVerts);
+
+	return result;
+}
+
 int BoneModelSetJointChildren(bone_joint *joints, int numJoints, collada_node *node, memory_arena *arena)
 {
 	int jointId = -1;
@@ -96,7 +227,7 @@ bone_model BoneModelGetFromColladaByName(collada_file *file, const char *name, m
 					pos.z = source->values[index*source->stride + 2];
 					pos.w = 1.0f;
 
-					pos = bindShapeMatrix * pos;
+					//pos = bindShapeMatrix * pos;
 
 					cur->position.x = pos.x;//source->values[index*source->stride + 0];
 					cur->position.y = pos.y;//source->values[index*source->stride + 1];
@@ -166,7 +297,7 @@ bone_model BoneModelGetFromColladaByName(collada_file *file, const char *name, m
 
 	//check for duplicate vertices
 	int currentUnique = 0;
-	for (int i = 0; i < currentVert - 1; i++)
+	for (int i = 0; i < currentVert; i++)
 	{
 		if (originalIndices[i] != -1) //don't look for duplicates of a duplicate
 			continue;
@@ -237,7 +368,7 @@ bone_model BoneModelGetFromColladaByName(collada_file *file, const char *name, m
 	{
 		result.joints[i].name = PUSH_ARRAY(arena, char, strlen(joints->name_values + 128*i) + 1);
 		strcpy(result.joints[i].name, joints->name_values + 128*i);
-		result.joints[i].inverseBindTransform = Transpose(M4(inverseBindTransforms->values + (i*16)));
+		result.joints[i].inverseBindTransform = Transpose(M4(inverseBindTransforms->values + (i*16))) * bindShapeMatrix;
 	}
 
 	char *rootBoneName = instance->instanceController.boneURL;

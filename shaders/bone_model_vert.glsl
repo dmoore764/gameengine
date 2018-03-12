@@ -18,8 +18,7 @@ uniform vec3 LightDir;
 uniform mat4 JointTransforms[MAX_JOINTS];
 
 void main() {
-	//vec3 color = vertexColor.rgb / 255.0;
-	vec3 color = vec3(0.5, 0.3, 0.2);	
+	vec3 color = vertexColor.rgb / 255.0;
 
 	vec4 totalLocalPos = vec4(0.0);
 	vec4 totalNormal = vec4(0.0);

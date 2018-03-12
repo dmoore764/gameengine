@@ -4,6 +4,11 @@
 #include "memory_arena.h"
 #include "collada.h"
 
+struct basic_mesh
+{
+	vertex_array_object mesh;
+};
+
 struct bone_keyframe
 {
 	float timeStamp;
@@ -46,6 +51,7 @@ struct bone_model_instance
 };
 
 
+basic_mesh BasicMeshGetFromColladaByName(collada_file *file, const char *name, memory_arena *arena);
 int BoneModelSetJointChildren(bone_joint *joints, int numJoints, collada_node *node, memory_arena *arena);
 bone_model BoneModelGetFromColladaByName(collada_file *file, const char *name, memory_arena *arena);
 bone_model_instance BoneModelInstanceNew(bone_model *model);

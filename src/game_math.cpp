@@ -12,6 +12,21 @@ v2i V2I(int x, int y)
 	return result;
 }
 
+bool operator==(const v2i &a, const v2i &b)
+{
+	bool result;
+	result = (a.x == b.x && a.y == b.y);
+	return result;
+}
+
+v2 V2(float x, float y)
+{
+	v2 result;
+	result.x = x;
+	result.y = y;
+	return result;
+}
+
 v2 operator+(const v2 &a, const v2 &b)
 {
 	v2 result;
@@ -44,7 +59,7 @@ v2 operator*(const v2 &b, float a)
 	return result;
 }
 
-inline float Inner(const v2 &a, const v2 &b)
+float Inner(const v2 &a, const v2 &b)
 {
 	float result;
 	result = a.x*b.x + a.y*b.y;
@@ -61,6 +76,12 @@ v2 Normalize(const v2 &a)
 float LengthSq(const v2 &a)
 {
 	float result = Inner(a, a);
+	return result;
+}
+
+float Length(const v2 &a)
+{
+	float result = sqrt(LengthSq(a));
 	return result;
 }
 
@@ -110,14 +131,14 @@ v3 operator*(const v3 &b, float a)
 	return result;
 }
 
-inline float Inner(const v3 &a, const v3 &b)
+float Inner(const v3 &a, const v3 &b)
 {
 	float result;
 	result = a.x*b.x + a.y*b.y + a.z*b.z;
 	return result;
 }
 
-inline v3 Cross(const v3 &a, const v3 &b)
+v3 Cross(const v3 &a, const v3 &b)
 {
 	v3 result;
 	result.x = a.y*b.z - a.z*b.y;
@@ -381,6 +402,15 @@ m4 MakeTranslation(float x, float y, float z)
 	return result;
 }
 
+m4 MakeScale(float x, float y, float z)
+{
+	m4 result = M4();
+	result.a = x;
+	result.f = y;
+	result.k = z;
+	return result;
+}
+
 m4 MakePerspective(float fov, float aspect, float n, float f)
 {
 	m4 result = M4(0.0f);
@@ -438,7 +468,15 @@ plane PlaneFromThreeNonColinearPoints(const v3 &p1, const v3 &p2, const v3 &p3)
 	return result;
 }
 
-inline bool PointOnPositivePlaneSide(const plane &p, const v3 &p0)
+plane PlaneFromNormalAndPoint(const v3 &n, const v3 &p)
+{
+	plane result;
+	result.normal = n;
+	result.d = -(n.x *p.x + n.y * p.y + n.z * p.z);
+	return result;
+}
+
+bool PointOnPositivePlaneSide(const plane &p, const v3 &p0)
 {
 	return (p.normal.x*p0.x + p.normal.y*p0.y + p.normal.z*p0.z + p.d > 0);
 }
@@ -594,6 +632,13 @@ quat operator-(const quat &a, const quat &b)
 	return result;
 }
 
+quat operator-(const quat &a)
+{
+	quat result = a;
+	result.w = -result.w;
+	return result;
+}
+
 quat operator*(const float &f, const quat &q)
 {
 	quat result = q;
@@ -673,6 +718,128 @@ quat M4ToQuat(const m4 &m)
 	q[k3] = ( m[1 * 4 + 2] - s0 * m[2 * 4 + 1] ) * s; 
 
 	return result;
+}
+
+m4 RotationPositionToM4(const quat &r, const v3 &p)
+{
+	m4 result;
+	result = QuatToM4(r);
+	result.col[3].x = p.x;
+	result.col[3].y = p.y;
+	result.col[3].z = p.z;
+	return result;
+}
+
+m4 RotationPositionScaleToM4(const quat &r, const v3 &p, const v3 &s)
+{
+	m4 result = RotationPositionToM4(r, p) * MakeScale(s.x, s.y, s.z);
+	return result;
+}
+
+void LinePlaneIntersection(const line_seg_3d &line, const plane &p, v3 *point, bool *parallel)
+{
+	float uPtDenom = (p.normal.x * (line.start.x - line.end.x) + p.normal.y * (line.start.y - line.end.y) + p.normal.z * (line.start.z - line.end.z));
+	if (FloatEquals(uPtDenom, 0, 0.0005f))
+	{
+		*parallel = true;
+	}
+	else
+	{
+		*parallel = false;
+		float uPt = (p.normal.x * line.start.x + p.normal.y * line.start.y + p.normal.z * line.start.z + p.d) / uPtDenom;
+		*point = line.start + uPt * (line.end - line.start);
+	}
+}
+
+line_seg_3d WindowPointToWorldLineSeg(const v2 &ndcPoint, const m4 &perspectiveView)
+{
+	line_seg_3d result;
+	v4 ndcNear = V4(ndcPoint.x, ndcPoint.y, -1, 1);
+	v4 ndcFar = V4(ndcPoint.x, ndcPoint.y, 1, 1);
+	m4 pvInv = Inverse(perspectiveView);
+	v4 worldPointNear = pvInv * ndcNear;
+	v3 nearPt = V3(worldPointNear.x, worldPointNear.y, worldPointNear.z) * (1.0f / worldPointNear.w);
+	v4 worldPointFar = pvInv * ndcFar;
+	v3 farPt = V3(worldPointFar.x, worldPointFar.y, worldPointFar.z) * (1.0f / worldPointFar.w);
+	result.start = nearPt;
+	result.end = farPt;
+	return result;
+}
+
+v2 WorldPointToNDCScreenPoint(const v3 &worldPoint, const m4 &perspectiveView)
+{
+	v4 worldPt = V4(worldPoint.x, worldPoint.y, worldPoint.z, 1.0f);
+	v4 ndcScreenPt = perspectiveView * worldPt;
+	v2 result = V2(ndcScreenPt.x, ndcScreenPt.y) * (1.0f / ndcScreenPt.w);
+	return result;
+}
+
+float DistanceToLineSeg2D(const line_seg_2d &seg, const v2 &p, v2 *pointOnSeg)
+{
+	float result = 0;
+
+	v2 segVec = seg.end - seg.start;
+	float segLengthSq = LengthSq(segVec);
+	float t = SafeDivide(((p.x - seg.start.x) * (segVec.x) + (p.y - seg.start.y) * (segVec.y)), segLengthSq);
+	
+	v2 closestP = seg.start + t * segVec;
+	if (t <= 0)
+		closestP = seg.start;
+	else if (t >= 1)
+		closestP = seg.end;
+
+	if (pointOnSeg)
+		*pointOnSeg = closestP;
+	result = Length(p - closestP);
+
+	return result;
+}
+
+float DistanceToLine(const line_seg_2d &line, const v2 &p, v2 *pointOnLine)
+{
+	float result = 0;
+
+	v2 segVec = line.end - line.start;
+	float segLengthSq = LengthSq(segVec);
+	float t = SafeDivide(((p.x - line.start.x) * (segVec.x) + (p.y - line.start.y) * (segVec.y)), segLengthSq);
+	
+	v2 closestP = line.start + t * segVec;
+	if (pointOnLine)
+		*pointOnLine = closestP;
+	result = Length(p - closestP);
+
+	return result;
+}
+
+#define D_MNOP(Points, M, N, O, P) ((Points[M-1].x - Points[N-1].x) * (Points[O-1].x - Points[P-1].x) + (Points[M-1].y - Points[N-1].y) * (Points[O-1].y - Points[P-1].y) + (Points[M-1].z - Points[N-1].z) * (Points[O-1].z - Points[P-1].z))
+
+void ClosestPointsOn3DLines(const line_seg_3d &lineA, const line_seg_3d &lineB, v3 *ptA, v3 *ptB, bool *parallel)
+{
+	v3 Points[4];
+	Points[0] = lineA.start;
+	Points[1] = lineA.end;
+	Points[2] = lineB.start;
+	Points[3] = lineB.end;
+	float d1343 = D_MNOP(Points, 1, 3, 4, 3);
+	float d4321 = D_MNOP(Points, 4, 3, 2, 1);
+	float d1321 = D_MNOP(Points, 1, 3, 2, 1);
+	float d4343 = D_MNOP(Points, 4, 3, 4, 3);
+	float d2121 = D_MNOP(Points, 2, 1, 2, 1);
+
+	float muaDenom = d2121 * d4343 - d4321 * d4321;
+	if (FloatEquals(muaDenom, 0, 0.005f) || FloatEquals(d4343, 0, 0.005f))
+	{
+		*parallel = true;
+	}
+	else
+	{
+		float mua = SafeDivide(d1343 * d4321 - d1321 * d4343, muaDenom);
+		float mub = SafeDivide(d1343 + mua * d4321, d4343);
+
+		*ptA = lineA.start + mua * (lineA.end - lineA.start);
+		*ptB = lineB.start + mub * (lineB.end - lineB.start);
+		*parallel = false;
+	}
 }
 
 float ReciprocalSqrt( float n)
@@ -847,13 +1014,19 @@ void ClampToRange(uint32_t min, uint32_t *val, uint32_t max)
 	*val = ClampToRange(min, *val, max);
 }
 
-inline bool PointInAABB(v2i p, v2i bl, v2i ur)
+bool PointInAABB(v2i p, v2i bl, v2i ur)
 {
 	return (p.x >= bl.x && p.x <= ur.x && p.y >= bl.y && p.y <= ur.y);
 }
 
-inline int LengthSq(v2i a)
+int LengthSq(v2i a)
 {
 	int result = (a.x*a.x) + (a.y*a.y);
 	return (result);
+}
+
+bool FloatEquals(float a, float b, float epsilon)
+{
+	bool result = (Abs(a - b) < epsilon);
+	return result;
 }

@@ -11,7 +11,9 @@ struct window
 	SDL_GLContext glContext;
 };
 
-void WinCreate(window *w, v2i size);
-void WinClear(float r, float g, float b);
-void WinSwapBuffers(window *w);
-void WinClose(window *w);
+void winCreate(window *w, v2i size);
+void winHandleEvent(window *w, SDL_Event *event);
+void winClear(float r, float g, float b);
+void winSwapBuffers(window *w);
+void winClose(window *w);
+v2 winGetNormalizedScreenPoint(window *w, v2i point);

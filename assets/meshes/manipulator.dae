@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.74.0 commit date:2015-03-31, commit time:13:39, hash:000dfc0</authoring_tool>
+    </contributor>
+    <created>2018-03-11T18:09:24</created>
+    <modified>2018-03-11T18:09:24</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_cameras>
+    <camera id="Camera-camera" name="Camera">
+      <optics>
+        <technique_common>
+          <perspective>
+            <xfov sid="xfov">49.13434</xfov>
+            <aspect_ratio>1.777778</aspect_ratio>
+            <znear sid="znear">0.1</znear>
+            <zfar sid="zfar">100</zfar>
+          </perspective>
+        </technique_common>
+      </optics>
+      <extra>
+        <technique profile="blender">
+          <YF_dofdist>0</YF_dofdist>
+          <shiftx>0</shiftx>
+          <shifty>0</shifty>
+        </technique>
+      </extra>
+    </camera>
+  </library_cameras>
+  <library_lights>
+    <light id="Lamp-light" name="Lamp">
+      <technique_common>
+        <point>
+          <color sid="color">1 1 1</color>
+          <constant_attenuation>1</constant_attenuation>
+          <linear_attenuation>0</linear_attenuation>
+          <quadratic_attenuation>0.00111109</quadratic_attenuation>
+        </point>
+      </technique_common>
+      <extra>
+        <technique profile="blender">
+          <adapt_thresh>0.000999987</adapt_thresh>
+          <area_shape>1</area_shape>
+          <area_size>0.1</area_size>
+          <area_sizey>0.1</area_sizey>
+          <area_sizez>1</area_sizez>
+          <atm_distance_factor>1</atm_distance_factor>
+          <atm_extinction_factor>1</atm_extinction_factor>
+          <atm_turbidity>2</atm_turbidity>
+          <att1>0</att1>
+          <att2>1</att2>
+          <backscattered_light>1</backscattered_light>
+          <bias>1</bias>
+          <blue>1</blue>
+          <buffers>1</buffers>
+          <bufflag>0</bufflag>
+          <bufsize>2880</bufsize>
+          <buftype>2</buftype>
+          <clipend>30.002</clipend>
+          <clipsta>1.000799</clipsta>
+          <compressthresh>0.04999995</compressthresh>
+          <dist sid="blender_dist">29.99998</dist>
+          <energy sid="blender_energy">1</energy>
+          <falloff_type>2</falloff_type>
+          <filtertype>0</filtertype>
+          <flag>0</flag>
+          <gamma sid="blender_gamma">1</gamma>
+          <green>1</green>
+          <halo_intensity sid="blnder_halo_intensity">1</halo_intensity>
+          <horizon_brightness>1</horizon_brightness>
+          <mode>8192</mode>
+          <ray_samp>1</ray_samp>
+          <ray_samp_method>1</ray_samp_method>
+          <ray_samp_type>0</ray_samp_type>
+          <ray_sampy>1</ray_sampy>
+          <ray_sampz>1</ray_sampz>
+          <red>1</red>
+          <samp>3</samp>
+          <shadhalostep>0</shadhalostep>
+          <shadow_b sid="blender_shadow_b">0</shadow_b>
+          <shadow_g sid="blender_shadow_g">0</shadow_g>
+          <shadow_r sid="blender_shadow_r">0</shadow_r>
+          <sky_colorspace>0</sky_colorspace>
+          <sky_exposure>1</sky_exposure>
+          <skyblendfac>1</skyblendfac>
+          <skyblendtype>1</skyblendtype>
+          <soft>3</soft>
+          <spotblend>0.15</spotblend>
+          <spotsize>75</spotsize>
+          <spread>1</spread>
+          <sun_brightness>1</sun_brightness>
+          <sun_effect_type>0</sun_effect_type>
+          <sun_intensity>1</sun_intensity>
+          <sun_size>1</sun_size>
+          <type>0</type>
+        </technique>
+      </extra>
+    </light>
+  </library_lights>
+  <library_images/>
+  <library_geometries>
+    <geometry id="Manipulator_002-mesh" name="Manipulator.002">
+      <mesh>
+        <source id="Manipulator_002-mesh-positions">
+          <float_array id="Manipulator_002-mesh-positions-array" count="69">0.001245737 -4.58766e-4 0.001212477 1.793949 -4.58766e-4 0.001212477 0.001245737 -0.003458738 -0.003983616 1.793949 -0.003458738 -0.003983616 0.001245737 -0.00945872 -0.003983616 1.793949 -0.00945872 -0.003983616 0.001245737 -0.01245874 0.001212477 1.793949 -0.01245874 0.001212477 0.001245737 -0.00945872 0.006408631 1.793949 -0.00945872 0.006408631 0.001245737 -0.003458738 0.006408631 1.793949 -0.003458738 0.006408631 1.786734 0.07354122 0.004265069 1.786734 0.05826258 -0.04275768 1.786734 0.01826256 -0.07181942 2.166734 -0.006458759 0.004265069 1.786734 -0.03118014 -0.07181942 1.786734 -0.0711801 -0.04275768 1.786734 -0.08645874 0.004265069 1.786734 -0.0711801 0.05128788 1.786734 -0.03118014 0.08034962 1.786734 0.01826256 0.08034962 1.786734 0.05826258 0.05128788</float_array>
+          <technique_common>
+            <accessor source="#Manipulator_002-mesh-positions-array" count="23" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Manipulator_002-mesh-normals">
+          <float_array id="Manipulator_002-mesh-normals-array" count="90">0 0.8660254 -0.5000001 0 0 -1 0 -0.8660256 -0.4999998 0 -0.8660255 0.4999997 0 0.8660255 0.5 0 0 1 0.1963257 0.5763463 0.7932723 0.1963258 0.9325478 -0.3030031 0.1963257 0 0.9805387 0.1963258 -0.576346 0.7932727 0.1963258 -0.9325478 0.303003 0.1963258 -0.9325478 -0.303003 0.1963258 -0.5763462 -0.7932724 0.1963258 -2.91629e-7 -0.9805386 0.1963258 0.9325478 0.3030028 0.1963258 0.5763463 -0.7932724 -1 0 0 0 0.8660253 -0.5000001 0 0 -1 0 -0.8660256 -0.4999998 0 -0.8660254 0.5000001 0 0.8660253 0.5000001 0 0 1 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0</float_array>
+          <technique_common>
+            <accessor source="#Manipulator_002-mesh-normals-array" count="30" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Manipulator_002-mesh-colors-Col" name="Col">
+          <float_array id="Manipulator_002-mesh-colors-Col-array" count="270">1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764 1 0.04705882 0.09411764</float_array>
+          <technique_common>
+            <accessor source="#Manipulator_002-mesh-colors-Col-array" count="90" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Manipulator_002-mesh-vertices">
+          <input semantic="POSITION" source="#Manipulator_002-mesh-positions"/>
+        </vertices>
+        <polylist count="30">
+          <input semantic="VERTEX" source="#Manipulator_002-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Manipulator_002-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Manipulator_002-mesh-colors-Col" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>1 0 0 3 0 1 2 0 2 3 1 3 5 1 4 4 1 5 5 2 6 7 2 7 6 2 8 7 3 9 9 3 10 8 3 11 11 4 12 1 4 13 0 4 14 9 5 15 11 5 16 10 5 17 21 6 18 15 6 19 22 6 20 12 7 21 15 7 22 13 7 23 20 8 24 15 8 25 21 8 26 19 9 27 15 9 28 20 9 29 18 10 30 15 10 31 19 10 32 17 11 33 15 11 34 18 11 35 16 12 36 15 12 37 17 12 38 14 13 39 15 13 40 16 13 41 22 14 42 15 14 43 12 14 44 13 15 45 15 15 46 14 15 47 12 16 48 14 16 49 17 16 50 0 17 51 1 17 52 2 17 53 2 18 54 3 18 55 4 18 56 4 19 57 5 19 58 6 19 59 6 20 60 7 20 61 8 20 62 10 21 63 11 21 64 0 21 65 8 22 66 9 22 67 10 22 68 21 23 69 22 23 70 12 23 71 19 24 72 20 24 73 21 24 74 17 25 75 18 25 76 19 25 77 14 26 78 16 26 79 17 26 80 12 27 81 13 27 82 14 27 83 19 28 84 21 28 85 12 28 86 12 29 87 17 29 88 19 29 89</p>
+        </polylist>
+      </mesh>
+    </geometry>
+    <geometry id="Manipulator_001-mesh" name="Manipulator.001">
+      <mesh>
+        <source id="Manipulator_001-mesh-positions">
+          <float_array id="Manipulator_001-mesh-positions-array" count="69">0.002047479 -4.58747e-4 0.002442955 0.002047419 -4.58747e-4 1.795146 0.007243633 -0.003458738 0.002442955 0.007243573 -0.003458738 1.795146 0.007243633 -0.00945872 0.002442955 0.007243573 -0.00945872 1.795146 0.002047419 -0.01245874 0.002442955 0.002047419 -0.01245874 1.795146 -0.003148674 -0.00945872 0.002442955 -0.003148674 -0.00945872 1.795146 -0.003148674 -0.003458738 0.002442955 -0.003148674 -0.003458738 1.795146 0.00318247 0.07354128 1.787931 0.05020529 0.05826264 1.787931 0.07926696 0.01826262 1.787931 0.003182411 -0.00645864 2.167931 0.07926696 -0.03118002 1.787931 0.05020529 -0.07118004 1.787931 0.00318247 -0.08645868 1.787931 -0.04384034 -0.07118004 1.787931 -0.07290208 -0.03118002 1.787931 -0.07290208 0.01826268 1.787931 -0.04384028 0.05826264 1.787931</float_array>
+          <technique_common>
+            <accessor source="#Manipulator_001-mesh-positions-array" count="23" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Manipulator_001-mesh-normals">
+          <float_array id="Manipulator_001-mesh-normals-array" count="90">0.4999997 0.8660256 0 1 0 0 0.4999994 -0.8660258 0 -0.5000004 -0.8660252 0 -0.5000007 0.866025 0 -1 0 0 -0.7932723 0.5763465 0.1963256 0.3030032 0.9325477 0.1963257 -0.9805388 0 0.1963257 -0.7932727 -0.5763459 0.1963257 -0.3030029 -0.9325479 0.1963257 0.303003 -0.9325478 0.1963257 0.7932728 -0.5763458 0.1963258 0.9805386 0 0.1963257 -0.3030028 0.9325479 0.1963257 0.7932728 0.5763458 0.1963258 0 0 -1 0.5000001 0.8660253 0 1 0 0 0.4999991 -0.8660259 0 -0.5000002 -0.8660253 0 -0.4999996 0.8660257 0 -1 0 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#Manipulator_001-mesh-normals-array" count="30" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Manipulator_001-mesh-colors-Col" name="Col">
+          <float_array id="Manipulator_001-mesh-colors-Col-array" count="270">0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.05098038 0.05882352 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1 0.1529412 0.04313725 1</float_array>
+          <technique_common>
+            <accessor source="#Manipulator_001-mesh-colors-Col-array" count="90" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Manipulator_001-mesh-vertices">
+          <input semantic="POSITION" source="#Manipulator_001-mesh-positions"/>
+        </vertices>
+        <polylist count="30">
+          <input semantic="VERTEX" source="#Manipulator_001-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Manipulator_001-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Manipulator_001-mesh-colors-Col" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>1 0 0 3 0 1 2 0 2 3 1 3 5 1 4 4 1 5 5 2 6 7 2 7 6 2 8 7 3 9 9 3 10 8 3 11 11 4 12 1 4 13 0 4 14 9 5 15 11 5 16 10 5 17 21 6 18 15 6 19 22 6 20 12 7 21 15 7 22 13 7 23 20 8 24 15 8 25 21 8 26 19 9 27 15 9 28 20 9 29 18 10 30 15 10 31 19 10 32 17 11 33 15 11 34 18 11 35 16 12 36 15 12 37 17 12 38 14 13 39 15 13 40 16 13 41 22 14 42 15 14 43 12 14 44 13 15 45 15 15 46 14 15 47 12 16 48 14 16 49 19 16 50 0 17 51 1 17 52 2 17 53 2 18 54 3 18 55 4 18 56 4 19 57 5 19 58 6 19 59 6 20 60 7 20 61 8 20 62 10 21 63 11 21 64 0 21 65 8 22 66 9 22 67 10 22 68 21 23 69 22 23 70 12 23 71 19 24 72 20 24 73 21 24 74 14 25 75 18 25 76 19 25 77 14 26 78 16 26 79 17 26 80 12 27 81 13 27 82 14 27 83 19 28 84 21 28 85 12 28 86 14 29 87 17 29 88 18 29 89</p>
+        </polylist>
+      </mesh>
+    </geometry>
+    <geometry id="Manipulator-mesh" name="Manipulator">
+      <mesh>
+        <source id="Manipulator-mesh-positions">
+          <float_array id="Manipulator-mesh-positions-array" count="69">0.00293529 -0.001891255 -0.008124411 0.00293523 1.790812 -0.008124411 0.008131444 -0.001891255 -0.00512439 0.008131384 1.790812 -0.00512439 0.008131444 -0.001891255 8.75588e-4 0.008131384 1.790812 8.75577e-4 0.00293523 -0.001891255 0.003875553 0.00293523 1.790812 0.003875553 -0.002260863 -0.001891255 8.75588e-4 -0.002260863 1.790812 8.75577e-4 -0.002260863 -0.001891255 -0.00512439 -0.002260863 1.790812 -0.00512439 -1.17325e-4 1.783597 -0.08212447 0.04690545 1.783597 -0.06684577 0.07596713 1.783597 -0.02684581 -1.17384e-4 2.163597 -0.002124428 0.07596713 1.783597 0.02259689 0.04690545 1.783597 0.06259685 -1.17325e-4 1.783597 0.07787549 -0.04714018 1.783597 0.06259685 -0.07620185 1.783597 0.02259689 -0.07620185 1.783597 -0.02684581 -0.04714012 1.783597 -0.06684583</float_array>
+          <technique_common>
+            <accessor source="#Manipulator-mesh-positions-array" count="23" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Manipulator-mesh-normals">
+          <float_array id="Manipulator-mesh-normals-array" count="90">0.4999987 0 -0.8660262 1 0 0 0.5000004 0 0.8660252 -0.500001 0 0.8660248 -0.4999994 0 -0.8660258 -1 0 0 -0.7932724 0.1963257 -0.5763463 0.3030042 0.1963258 -0.9325474 -0.9805388 0.1963257 0 -0.7932725 0.1963257 0.5763463 -0.3030028 0.1963257 0.9325478 0.3030031 0.1963257 0.9325478 0.7932724 0.1963258 0.5763463 0.9805388 0.1963258 0 -0.3030031 0.1963258 -0.9325478 0.7932726 0.1963258 -0.5763461 0 -1 0 0.4999997 0 -0.8660256 1 0 0 0.4999988 0 0.8660262 -0.4999996 0 0.8660257 -0.4999988 0 -0.8660262 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0</float_array>
+          <technique_common>
+            <accessor source="#Manipulator-mesh-normals-array" count="30" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Manipulator-mesh-colors-Col" name="Col">
+          <float_array id="Manipulator-mesh-colors-Col-array" count="270">0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0.1294118 1 0.2039216 0.06274509 1 0.1490196 0.05882352 1 0.145098 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0 1 0.02745097 0.05882352 1 0.145098 0.06274509 1 0.1490196 0.1294118 1 0.2039216 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.06274509 1 0.1490196 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098 0.06274509 1 0.1490196 0.05882352 1 0.145098 0.05882352 1 0.145098 0.05882352 1 0.145098</float_array>
+          <technique_common>
+            <accessor source="#Manipulator-mesh-colors-Col-array" count="90" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Manipulator-mesh-vertices">
+          <input semantic="POSITION" source="#Manipulator-mesh-positions"/>
+        </vertices>
+        <polylist count="30">
+          <input semantic="VERTEX" source="#Manipulator-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Manipulator-mesh-normals" offset="1"/>
+          <input semantic="COLOR" source="#Manipulator-mesh-colors-Col" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>1 0 0 3 0 1 2 0 2 3 1 3 5 1 4 4 1 5 5 2 6 7 2 7 6 2 8 7 3 9 9 3 10 8 3 11 11 4 12 1 4 13 0 4 14 9 5 15 11 5 16 10 5 17 21 6 18 15 6 19 22 6 20 12 7 21 15 7 22 13 7 23 20 8 24 15 8 25 21 8 26 19 9 27 15 9 28 20 9 29 18 10 30 15 10 31 19 10 32 17 11 33 15 11 34 18 11 35 16 12 36 15 12 37 17 12 38 14 13 39 15 13 40 16 13 41 22 14 42 15 14 43 12 14 44 13 15 45 15 15 46 14 15 47 12 16 48 13 16 49 19 16 50 0 17 51 1 17 52 2 17 53 2 18 54 3 18 55 4 18 56 4 19 57 5 19 58 6 19 59 6 20 60 7 20 61 8 20 62 10 21 63 11 21 64 0 21 65 8 22 66 9 22 67 10 22 68 19 23 69 22 23 70 12 23 71 19 24 72 20 24 73 21 24 74 14 25 75 18 25 76 19 25 77 14 26 78 16 26 79 17 26 80 19 27 81 13 27 82 14 27 83 19 28 84 21 28 85 22 28 86 14 29 87 17 29 88 18 29 89</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers/>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="XAxis" name="XAxis" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 0</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#Manipulator_002-mesh"/>
+      </node>
+      <node id="ZAxis" name="ZAxis" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 0</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#Manipulator_001-mesh"/>
+      </node>
+      <node id="Camera" name="Camera" type="NODE">
+        <translate sid="location">7.481132 -6.50764 5.343665</translate>
+        <rotate sid="rotationZ">0 0 1 46.69194</rotate>
+        <rotate sid="rotationY">0 1 0 0.619768</rotate>
+        <rotate sid="rotationX">1 0 0 63.5593</rotate>
+        <scale sid="scale">1 0.9999999 1</scale>
+        <instance_camera url="#Camera-camera"/>
+      </node>
+      <node id="Lamp" name="Lamp" type="NODE">
+        <translate sid="location">4.076245 1.005454 5.903862</translate>
+        <rotate sid="rotationZ">0 0 1 106.9363</rotate>
+        <rotate sid="rotationY">0 1 0 3.163707</rotate>
+        <rotate sid="rotationX">1 0 0 37.26105</rotate>
+        <scale sid="scale">1 0.9999999 1</scale>
+        <instance_light url="#Lamp-light"/>
+      </node>
+      <node id="YAxis" name="YAxis" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 0</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#Manipulator-mesh"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>
