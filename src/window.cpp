@@ -37,8 +37,66 @@ void winCreate(window *w, v2i size)
 	SDL_GL_GetDrawableSize(w->win, &w->backingRes.w, &w->backingRes.h);
 }
 
+void winUpdateScrolling(window *w)
+{
+	for (int i = 0; i < ArrayCount(w->scroll); i++)
+	{
+		inertial_scroll *scroll = &w->scroll[i];
+		if (scroll->scrolling)
+		{
+			if (scroll->scroll_acceleration > 0) 
+				scroll->scroll_acceleration -= scroll->scroll_friction;
+			if (scroll->scroll_acceleration < 0) 
+				scroll->scroll_acceleration += scroll->scroll_friction;
+			if (Abs(scroll->scroll_acceleration) < scroll->scroll_friction * 3) 
+				scroll->scroll_acceleration = 0;
+			scroll->frame_scroll_amount = scroll->scroll_sensitivity * scroll->scroll_acceleration;
+		}
+		else
+			scroll->frame_scroll_amount = 0;
+	}
+}
+
 void winHandleEvent(window *w, SDL_Event *event)
 {
+	if (event->type == SDL_MULTIGESTURE)
+	{
+		if (event->mgesture.numFingers == 2)
+		{
+			if (w->scrollX.scrolling == 0)
+			{
+				w->scrollX.scrolling = 1;
+				w->scrollX.scroll_prev_pos = event->mgesture.x;
+			}
+			else
+			{
+				double dx = event->mgesture.x - w->scrollX.scroll_prev_pos;
+				w->scrollX.scroll_acceleration = dx * 40;
+				w->scrollX.scroll_prev_pos = event->mgesture.x;
+				w->scrollX.scrolling = 1;
+			}
+
+			if (w->scrollY.scrolling == 0)
+			{
+				w->scrollY.scrolling = 1;
+				w->scrollY.scroll_prev_pos = event->mgesture.y;
+			}
+			else
+			{
+				double dy = event->mgesture.y - w->scrollY.scroll_prev_pos;
+				w->scrollY.scroll_acceleration = dy * 40;
+				w->scrollY.scroll_prev_pos = event->mgesture.y;
+				w->scrollY.scrolling = 1;
+			}
+		}
+	} 
+
+	if (event->type == SDL_FINGERDOWN)
+	{
+		w->scrollX.scrolling = 0;
+		w->scrollY.scrolling = 0;
+	}
+
 	if (event->type == SDL_WINDOWEVENT) {
 		switch (event->window.event) {
 			case SDL_WINDOWEVENT_SHOWN:
@@ -101,6 +159,7 @@ void winHandleEvent(window *w, SDL_Event *event)
 			{
 				//SDL_Log("Window %d closed", event->window.windowID);
 			} break;
+
 #if SDL_VERSION_ATLEAST(2, 0, 5)
 			case SDL_WINDOWEVENT_TAKE_FOCUS:
 			{

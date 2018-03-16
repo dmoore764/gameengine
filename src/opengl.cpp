@@ -86,6 +86,18 @@ void oglGenerateNew2DTexture(texture *t, v2i size)
 
 		format = GL_RED;
 	}
+	else if (t->storageFlags & STORAGE_RG)
+	{
+		if (t->storageFlags & STORAGE_UNSIGNED_BYTE)
+			internalFormat = GL_RG8;
+		if (t->storageFlags & STORAGE_FLOAT_16)
+		{
+			internalFormat = GL_RG16F;
+			type = GL_FLOAT;
+		}
+
+		format = GL_RG;
+	}
 	else if (t->storageFlags & STORAGE_RGB)
 	{
 		if (t->storageFlags & STORAGE_UNSIGNED_BYTE)

@@ -7,52 +7,54 @@ in vec2 ThruUV;
 
 out vec4 color;
 
-const vec4 outlineColor = vec4(0,1,0,1);
 const vec4 noColor = vec4(0,0,0,0);
 
 void main()
 {
-	float current = texture(Texture, ThruUV).r;
-	if (current > 0.0)
+	vec2 current = texture(Texture, ThruUV).rg;
+	if (current.r + current.g> 0.0)
 	{
 		color = noColor;
 	}
 	else
 	{
-		float total = 0;
+		vec2 outColor = vec2(0.0,0.0);
 		float oneOverResX = 1.0 / Resolution.x;
 		float twoOverResX = 2.0 / Resolution.x;
 		float oneOverResY = 1.0 / Resolution.y;
 		float twoOverResY = 2.0 / Resolution.y;
-		total += texture(Texture, ThruUV + vec2(-oneOverResX, -twoOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(0, -twoOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(oneOverResX, -twoOverResY)).r;
+		outColor += texture(Texture, ThruUV + vec2(-oneOverResX, -twoOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(0, -twoOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(oneOverResX, -twoOverResY)).rg;
 
-		total += texture(Texture, ThruUV + vec2(-twoOverResX, -oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(-oneOverResX, -oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(0, -oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(oneOverResX, -oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(twoOverResX, -oneOverResY)).r;
+		outColor += texture(Texture, ThruUV + vec2(-twoOverResX, -oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(-oneOverResX, -oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(0, -oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(oneOverResX, -oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(twoOverResX, -oneOverResY)).rg;
 
-		total += texture(Texture, ThruUV + vec2(-twoOverResX, 0)).r;
-		total += texture(Texture, ThruUV + vec2(-oneOverResX, 0)).r;
-		total += texture(Texture, ThruUV + vec2(oneOverResX, 0)).r;
-		total += texture(Texture, ThruUV + vec2(twoOverResX, 0)).r;
+		outColor += texture(Texture, ThruUV + vec2(-twoOverResX, 0)).rg;
+		outColor += texture(Texture, ThruUV + vec2(-oneOverResX, 0)).rg;
+		outColor += texture(Texture, ThruUV + vec2(oneOverResX, 0)).rg;
+		outColor += texture(Texture, ThruUV + vec2(twoOverResX, 0)).rg;
 
-		total += texture(Texture, ThruUV + vec2(-twoOverResX, oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(-oneOverResX, oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(0, oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(oneOverResX, oneOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(twoOverResX, oneOverResY)).r;
+		outColor += texture(Texture, ThruUV + vec2(-twoOverResX, oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(-oneOverResX, oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(0, oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(oneOverResX, oneOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(twoOverResX, oneOverResY)).rg;
 
-		total += texture(Texture, ThruUV + vec2(-oneOverResX, twoOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(0, twoOverResY)).r;
-		total += texture(Texture, ThruUV + vec2(oneOverResX, twoOverResY)).r;
+		outColor += texture(Texture, ThruUV + vec2(-oneOverResX, twoOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(0, twoOverResY)).rg;
+		outColor += texture(Texture, ThruUV + vec2(oneOverResX, twoOverResY)).rg;
 
-		if (total > 0.1)
+		if (outColor.r > 0.1)
 		{
-			total *= 0.3;
-			color = total * outlineColor;
+			color = vec4(0.5, 1.0, 0.8, 1.0);
+		}
+		else if (outColor.g > 0.1)
+		{
+			color = vec4(1.0, 1.0, 1.0, 1.0);
 		}
 		else
 		{

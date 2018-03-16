@@ -183,8 +183,11 @@ float Min(float a, float b);
 float Max(float a, float b);
 float ClampToRange(float min, float val, float max);
 void ClampToRange(float min, float *val, float max);
+float WrapToRange(float min, float val, float max);
+void WrapToRange(float min, float *val, float max);
 float Abs(float a);
 float Sign(float a);
+float SnapToGrid(float val, float grid);
 
 int Min(int a, int b);
 int Max(int a, int b);

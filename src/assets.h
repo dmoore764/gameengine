@@ -22,6 +22,7 @@ struct assets
 	basic_mesh physShapeCapsuleMiddle;
 	basic_mesh physShapeCapsuleTop;
 	basic_mesh physShapePlane;
+	basic_mesh objmarker;
 
 	generic_hash boneModelHash;
 	generic_hash basicMeshHash;

@@ -429,31 +429,19 @@ m4 MakePerspective(float fov, float aspect, float n, float f)
 m4 MakeLookat(v3 pos, v3 up, v3 at)
 {
 	m4 result;
-	m4 trans = MakeTranslation(-pos.x, -pos.y, -pos.z);
-	up = Normalize(up);
-	v3 forward = Normalize(pos - at);
-	v3 right = Normalize(Cross(up, forward));
-	result.a = right.x;
-	result.b = right.y;
-	result.c = right.z;
-	result.d = 0;
+	v3 zaxis = Normalize(pos - at);
+	v3 xaxis = Normalize(Cross(up, zaxis));
+	v3 yaxis = Cross(zaxis, xaxis);
 
-	result.e = up.x;
-	result.f = up.y;
-	result.g = up.z;
-	result.h = 0;
+	result.col[0] = {xaxis.x, yaxis.x, zaxis.x, 0};
+	result.col[1] = {xaxis.y, yaxis.y, zaxis.y, 0};
+	result.col[2] = {xaxis.z, yaxis.z, zaxis.z, 0};
+	result.col[3] = {0,0,0,1};
 
-	result.i = forward.x;
-	result.j = forward.y;
-	result.k = forward.z;
-	result.l = 0;
+	m4 translate = MakeTranslation(-pos.x, -pos.y, -pos.z);
 
-	result.m = 0;
-	result.n = 0;
-	result.o = 0;
-	result.p = 1;
+	result = result * translate;
 
-	result = result*trans;
 	return result;
 }
 
@@ -903,6 +891,25 @@ void ClampToRange(float min, float *val, float max)
 	*val = ClampToRange(min, *val, max);
 }
 
+float WrapToRange(float min, float val, float max)
+{
+	float result = val;
+	assert (max > min);
+	float range = max - min;
+	while (result > max)
+		result -= range;
+	while (result < min)
+		result += range;
+
+	return result;
+}
+
+void WrapToRange(float min, float *val, float max)
+{
+	*val = WrapToRange(min, *val, max);
+}
+
+
 float Abs(float a)
 {
 	float result = a;
@@ -918,6 +925,14 @@ float Sign(float a)
 		result = -1;
 	if (a > 0)
 		result = 1;
+	return result;
+}
+
+float SnapToGrid(float val, float grid)
+{
+	float result = val;
+	float remainder = fmodf(result, grid);
+	result -= remainder;
 	return result;
 }
 

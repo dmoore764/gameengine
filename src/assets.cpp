@@ -46,6 +46,10 @@ void assLoad(assets *ass, memory_arena *arena)
 	ass->manipulatorZ = BasicMeshGetFromColladaByName(&manipulator, "ZAxis", arena);
 	AddToHash(&ass->basicMeshHash, &ass->manipulatorZ, "editorAssetManipulatorZ");
 
+	collada_file objectmarker = ReadColladaFile("../assets/meshes/nonvisualobject.dae", arena);
+	ass->objmarker = BasicMeshGetFromColladaByName(&objectmarker, "Cube", arena);
+	AddToHash(&ass->basicMeshHash, &ass->objmarker, "editorAssetObjectMarker");
+
 	//Shader loading
 	oglLoadShader(&ass->basicMeshColoredVerts, "../shaders/basic_mesh_colored_verts_vert.glsl", "../shaders/basic_mesh_colored_verts_frag.glsl");
 	ass->basicMeshColoredVerts.vertexAttributes = ATTR_POSITION | ATTR_COLOR;

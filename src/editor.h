@@ -44,12 +44,10 @@ struct rotator
 	int whichAxis;
 	quat initialRotation;	//rotation of object when rotation is initiated
 	float rotationOffset;	//angle of point on plane that is acting as the rotation handle
+	float rotationAmount;
 	v3 initialUp;
 	v3 initialRight;
 	v3 initialNormal;
-
-	vertex_array_object *axisToDraw;
-	vertex_array_object *axisPlaneToDraw;
 };
 
 struct obj3d_mesh_assignment
@@ -85,3 +83,43 @@ struct obj3d_editor
 	v3 dimensions;
 	v3 offset;
 };
+
+struct editor
+{
+	int numObjects;
+	obj3d_editor objects[1000];
+	obj3d_editor *edit;
+
+	float snapToGrid;
+	float snapToAngle;
+	int editState;
+	int localHandle;
+	manipulator objHandle;
+	rotator objRotator;
+
+	v3 camPt;
+	float camTheta;
+	float camPhi;
+	v3 camUp;
+	float camZoom;
+	v3 camPos;
+
+	float vfov;
+	bool mouseWasDown;
+	bool showDebug;
+
+	bool escWasDown;
+	bool gWasDown; //set global transform
+	bool lWasDown; //set local transform
+	bool sWasDown; //set scale mode
+	bool tWasDown; //set translate mode
+	bool rWasDown; //set rotate mode
+	bool xWasDown; //x rotation axis
+	bool yWasDown; //y rotation axis
+	bool zWasDown; //z rotation axis
+};
+
+void editorInit(editor *);
+void editorNewObj3D(editor *e);
+void editorMoveCamera(editor *e, float *scrollVelX, float *scrollVelY);
+void editorUpdateCamera(editor *e);

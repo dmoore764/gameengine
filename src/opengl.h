@@ -70,11 +70,12 @@ enum texture_load_flags
 enum texture_storage_flags
 {
 	STORAGE_R						= 0x1,
-	STORAGE_RGB						= 0x2,
-	STORAGE_RGBA					= 0x4,
-	STORAGE_DEPTH_STENCIL			= 0x8,
-	STORAGE_UNSIGNED_BYTE			= 0x10,
-	STORAGE_FLOAT_16				= 0x20,
+	STORAGE_RG						= 0x2,
+	STORAGE_RGB						= 0x4,
+	STORAGE_RGBA					= 0x8,
+	STORAGE_DEPTH_STENCIL			= 0x10,
+	STORAGE_UNSIGNED_BYTE			= 0x20,
+	STORAGE_FLOAT_16				= 0x40,
 };
 
 struct texture
